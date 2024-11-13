@@ -1,41 +1,15 @@
-flex lex.l
 
-bison -d ett.y
 
-g++ lex.yy.c ett.tab.c -o traductor
+- **Flex**: Para el análisis léxico.
+- **Bison**: Para el análisis sintáctico.
+- **g++**: Para compilar el código generado.
 
-./traductor
+## Instrucciones de Ejecución
 
-Para ejecutar el programa ejemplo profesora:
+1. **Compilación de los archivos de código**:
 
-anfang  
 
-farbe(rojo)
-
-pos(30,30)
-
-rec(2)
-
-unt(4)
-
-wert B1=1
-
-unt(2)
-
-lin(B1)
-
-rec(3)
-
-wert C3=200
-
-pos(C3,30)
-
-wert D5=verde
-
-farbe(D5)
-
-unt(8)
-
-rec(4)
-
-ende                                 
+   ```bash
+   flex lex.l
+   bison -d ett.y
+   g++ lex.yy.c ett.tab.c -o traductor
