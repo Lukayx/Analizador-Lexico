@@ -1,6 +1,9 @@
 flex lex.l
+
 bison -d ett.y
+
 g++ lex.yy.c ett.tab.c -o traductor
+
 ./traductor
 
 Para ejecutar el programa ejemplo profesora:
