@@ -4,6 +4,8 @@
 #include <string.h>
 #include <map>
 #include <string>
+#define SDL_MAIN_HANDLED
+#include <SDL2/SDL.h>
 
 
 void yyerror(const char *s);
@@ -11,6 +13,9 @@ extern int yylex();
 
 std::map<std::string, std::string> symbol_table;
 
+void init_sdl();
+void cleanup_sdl();
+void handle_events();
 void set_color(const char* color);
 void set_position(int x, int y);
 void draw_rec(int x);
@@ -20,6 +25,13 @@ void draw_unt(int x);
 void assign_value(const char* id, const char* value);
 void assign_value_int(const char* id, int value);
 std::string get_value(const char* id);
+
+
+SDL_Window* window = nullptr;
+SDL_Renderer* renderer = nullptr;
+SDL_Color current_color = {0, 0, 0, 255}; 
+int current_x = 0, current_y = 0;
+
 %}
 
 %union {
@@ -37,9 +49,9 @@ std::string get_value(const char* id);
 
 %%
 
-S: ANFANG Instrucciones ENDE { printf("Programa válido\n"); }
+S: ANFANG {init_sdl(); handle_events();} Instrucciones ENDE { 
+    printf("Programa válido\n"); cleanup_sdl(); exit(0); }
  ;
-
 Instrucciones: inst Instrucciones
              | /* vacío */
  ;
@@ -111,32 +123,64 @@ void yyerror(const char *s) {
 }
 
 int main() {
+    printf("Ingrese instrucciones:\n\n");
     return yyparse();
 }
 
 void set_color(const char* color) {
     printf("Fijando color a %s\n", color);
+    if (strcmp(color, "rojo") == 0) {
+        current_color = {255, 0, 0, 255};
+    } else if (strcmp(color, "verde") == 0) {
+        current_color = {0, 255, 0, 255};
+    } else if (strcmp(color, "azul") == 0) {
+        current_color = {0, 0, 255, 255};
+    } else if (strcmp(color, "amarillo") == 0) {
+        current_color = {255, 255, 0, 255};
+    } else if (strcmp(color, "blanco") == 0) {
+        current_color = {255, 255, 255, 255};
+    }
+    SDL_SetRenderDrawColor(renderer, current_color.r, current_color.g, current_color.b, current_color.a);
 }
 
 void set_position(int x, int y) {
     printf("Fijando posición a (%d, %d)\n", x, y);
+    current_x = x;
+    current_y = y;
 }
 
 void draw_rec(int x) {
     printf("Dibujando %d trazos hacia la derecha\n", x);
+    SDL_SetRenderDrawColor(renderer, current_color.r, current_color.g, current_color.b, current_color.a);
+    SDL_RenderDrawLine(renderer, current_x, current_y, current_x + x, current_y);
+    current_x += x;
+    SDL_RenderPresent(renderer);
 }
 
 void draw_lin(int x) {
     printf("Dibujando %d trazos hacia la izquierda\n", x);
+    SDL_SetRenderDrawColor(renderer, current_color.r, current_color.g, current_color.b, current_color.a);
+    SDL_RenderDrawLine(renderer, current_x, current_y, current_x - x, current_y);
+    current_x -= x;
+    SDL_RenderPresent(renderer);
 }
 
 void draw_ube(int x) {
     printf("Dibujando %d trazos hacia arriba\n", x);
+    SDL_SetRenderDrawColor(renderer, current_color.r, current_color.g, current_color.b, current_color.a);
+    SDL_RenderDrawLine(renderer, current_x, current_y, current_x, current_y - x);
+    current_y -= x;
+    SDL_RenderPresent(renderer);
 }
 
 void draw_unt(int x) {
     printf("Dibujando %d trazos hacia abajo\n", x);
+    SDL_SetRenderDrawColor(renderer, current_color.r, current_color.g, current_color.b, current_color.a);
+    SDL_RenderDrawLine(renderer, current_x, current_y, current_x, current_y + x);
+    current_y += x;
+    SDL_RenderPresent(renderer);
 }
+
 
 void assign_value(const char* id, const char* value) {
     printf("Asignando a %s el valor %s\n", id, value);
@@ -157,4 +201,56 @@ std::string get_value(const char* id) {
         printf("Error: identificador %s no definido\n", id);
         return "0";
     }
+}
+
+void init_sdl() {
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        fprintf(stderr, "Error inicializando SDL2: %s\n", SDL_GetError());
+        exit(1);
+    }
+
+    int window_x = 550; 
+    int window_y = 100;
+
+    window = SDL_CreateWindow("ETT Draw",
+                              window_x, window_y,
+                              800, 600, SDL_WINDOW_SHOWN);
+
+    if (!window) {
+        fprintf(stderr, "Error creando ventana: %s\n", SDL_GetError());
+        SDL_Quit();
+        exit(1);
+    }
+
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (!renderer) {
+        fprintf(stderr, "Error creando renderizador: %s\n", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        exit(1);
+    }
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Fondo blanco
+    SDL_RenderClear(renderer);
+    SDL_RenderPresent(renderer);
+}
+
+void handle_events() {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT) {
+            cleanup_sdl();
+            exit(0);
+        }
+    }
+}
+
+void cleanup_sdl() {
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+    }
+    if (window) {
+        SDL_DestroyWindow(window);
+    }
+    SDL_Quit();
 }
