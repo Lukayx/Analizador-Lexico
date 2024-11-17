@@ -1,45 +1,39 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include "turtle.h"
-#include "turtle.tab.h"  // Incluir el archivo de encabezado generado por Bison
-
-extern YYSTYPE yylval;
-extern int yyparse(void);
-
-extern Turtle turtle;  // Declarar turtle como extern
+#include <string.h>
+#include "ett.tab.h"
 %}
 
 %%
 
-"anfang"         { printf("Inicio del programa\n"); inicializar_turtle(&turtle); return ANFANG; }
-"farbe"          { printf("Comando de cambio de color\n"); return FARBE; }
-"pos"            { printf("Comando de posición\n"); return POS; }
-"rec"            { printf("Comando de trazo a la derecha\n"); return REC; }
-"lin"            { printf("Comando de trazo a la izquierda\n"); return LIN; }
-"ube"            { printf("Comando de trazo hacia arriba\n"); return UBE; }
-"unt"            { printf("Comando de trazo hacia abajo\n"); return UNT; }
-"wert"           { printf("Comando de asignación\n"); return WERT; }
-"ende"           { printf("Fin del programa\n"); return ENDE; }
+"anfang"             { return ANFANG; }
+"farbe"              { return FARBE; }
+"wert"               { return WERT; }
+"ende"               { return ENDE; }
+"pos"                { return POS; }
+"rec"                { return REC; }
+"lin"                { return LIN; }
+"ube"                { return UBE; }
+"unt"                { return UNT; }
 
-"rojo"           { yylval.color = 0xFF0000; return COLOR; }
-"verde"          { yylval.color = 0x00FF00; return COLOR; }
-"azul"           { yylval.color = 0x0000FF; return COLOR; }
-"amarillo"       { yylval.color = 0xFFFF00; return COLOR; }
-"blanco"         { yylval.color = 0xFFFFFF; return COLOR; }
+"rojo"               { yylval.str = strdup("rojo"); return ROJO; }
+"verde"              { yylval.str = strdup("verde"); return VERDE; }
+"azul"               { yylval.str = strdup("azul"); return AZUL; }
+"amarillo"           { yylval.str = strdup("amarillo"); return AMARILLO; }
+"blanco"             { yylval.str = strdup("blanco"); return BLANCO; }
 
-[A-Z][0-9]*      { strcpy(yylval.id, yytext); printf("Identificador: %s\n", yytext); return ID; }
+[A-Z][0-9]           { yylval.str = strdup(yytext); return ID; }
 
-[0-9]+           { yylval.num = atoi(yytext); printf("Constante entera: %s\n", yytext); return NUMERO; }
+[0-9]+               { yylval.num = atoi(yytext); return CONST; }
 
-"("              { return '('; }
-")"              { return ')'; }
-","              { return ','; }
-"="              { return '='; }
+"("                  { return '('; }
+")"                  { return ')'; }
+","                  { return ','; }
+"="                  { return '='; }
+[ \t\n]+             { /* Ignorar espacios en blanco */ }
 
-[ \t\n\r]+       { /* Ignorar espacios, tabulaciones y nuevas líneas */ }
-
-.                { printf("Carácter desconocido: %c\n", *yytext); }
+.                    { printf("Carácter desconocido: %c\n", *yytext); }
 
 %%
 
