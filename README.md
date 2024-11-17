@@ -1,7 +1,9 @@
 -Este programa de compila desde Powershell con estos comandos
 
   flex lex.l
+  
   bison -d ett.y
+  
   g++ -I SDL2/include -L SDL2/lib lex.yy.c ett.tab.c -o traductor -lmingw32 -lSDL2 -lSDL2main
 
 -En caso de cualquier problema una forma alternativa de compilarlo es sin usar MinGW ni GnuWin32 (carpetas de C:)
@@ -21,13 +23,17 @@ En este caso ya no sera necesario las carpetas MinGW ni GnuWin32 ya que seran re
 -Necesario para usar el programa:
 
   pacman -Syu
+  
   pacman -S flex bison // instal flex y bison de forma distinta a los instaladores
+  
   pacman -S mingw-w64-x86_64-toolchain //librerias normales
+  
   pacman -S mingw-w64-x86_64-SDL2 //libreria para graficar
 
 -Configurar variables de entorno (PATH):
 
   C:\msys64\usr\bin //para flex y bison
+  
   C:\msys64\mingw64\bin //librerias en general
 
 //recuerde que si tiene PATHs de MinGW o GnuWin32 entonces debe eliminarlas para no interferir con las nuevas rutas
@@ -35,5 +41,7 @@ En este caso ya no sera necesario las carpetas MinGW ni GnuWin32 ya que seran re
 -Comandos para compilar los archivos:
 
   flex lex.l
+  
   bison -d ett.y
+  
   g++ lex.yy.c ett.tab.c -o traductor -lmingw32 -lSDL2 -lSDL2main
