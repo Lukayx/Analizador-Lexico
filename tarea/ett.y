@@ -122,7 +122,22 @@ void yyerror(const char *s) {
     fprintf(stderr, "Error: %s\n", s);
 }
 
+void show_help() {
+    printf("Instrucciones:\n");
+    printf("- ANFANG: Inicia el programa\n");
+    printf("- ENDE: Termina el programa\n");
+    printf("- FARBE(c): Establece el color (ROJO, VERDE, AZUL, AMARILLO, BLANCO)\n");
+    printf("- POS(x, y): Establece la posicion (x, y)\n");
+    printf("- REC(x): Dibuja linea derecha de longitud x\n");
+    printf("- LIN(x): Dibuja linea izquierda de longitud x\n");
+    printf("- UBE(x): Dibuja linea arriba de longitud x\n");
+    printf("- UNT(x): Dibuja linea abajo de longitud x\n");
+    printf("- WERT(id = valor): Asigna valor a identificador\n");
+    printf("Ejemplo: FARBE(ROJO) POS(100,100) REC(50)\n");
+}
+
 int main() {
+    show_help();  // Muestra las instrucciones al inicio
     printf("Ingrese instrucciones:\n\n");
     return yyparse();
 }
