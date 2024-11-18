@@ -31,6 +31,7 @@ SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
 SDL_Color current_color = {0, 0, 0, 255}; 
 int current_x = 0, current_y = 0;
+int drawPixels(int x);
 
 %}
 
@@ -124,26 +125,26 @@ void yyerror(const char *s) {
 
 void show_help() {
     printf("Instrucciones:\n");
-    printf("- ANFANG: Inicia el programa\n");
-    printf("- ENDE: Termina el programa\n");
-    printf("- FARBE(c): Establece el color (ROJO, VERDE, AZUL, AMARILLO, BLANCO)\n");
-    printf("- POS(x, y): Establece la posicion (x, y)\n");
-    printf("- REC(x): Dibuja linea derecha de longitud x\n");
-    printf("- LIN(x): Dibuja linea izquierda de longitud x\n");
-    printf("- UBE(x): Dibuja linea arriba de longitud x\n");
-    printf("- UNT(x): Dibuja linea abajo de longitud x\n");
-    printf("- WERT(id = valor): Asigna valor a identificador\n");
+    printf("- anfang: Inicia el programa\n");
+    printf("- ende: Termina el programa\n");
+    printf("- farbe(c): Establece el color (ROJO, VERDE, AZUL, AMARILLO, BLANCO)\n");
+    printf("- pos(x,y): Establece la posicion (x, y)\n");
+    printf("- rec(x): Dibuja linea derecha de longitud x\n");
+    printf("- lin(x): Dibuja linea izquierda de longitud x\n");
+    printf("- ube(x): Dibuja linea arriba de longitud x\n");
+    printf("- unt(x): Dibuja linea abajo de longitud x\n");
+    printf("- wert(id = valor): Asigna valor a identificador\n");
     printf("Ejemplo: FARBE(ROJO) POS(100,100) REC(50)\n");
 }
 
 int main() {
     show_help();  // Muestra las instrucciones al inicio
-    printf("Ingrese instrucciones:\n\n");
+    printf("\nIngrese instrucciones:\n\n");
     return yyparse();
 }
 
 void set_color(const char* color) {
-    printf("Fijando color a %s\n", color);
+    //printf("Fijando color a %s\n", color);
     if (strcmp(color, "rojo") == 0) {
         current_color = {255, 0, 0, 255};
     } else if (strcmp(color, "verde") == 0) {
@@ -159,51 +160,50 @@ void set_color(const char* color) {
 }
 
 void set_position(int x, int y) {
-    printf("Fijando posición a (%d, %d)\n", x, y);
+    //printf("Fijando posición a (%d, %d)\n", x, y);
     current_x = x;
     current_y = y;
 }
 
 void draw_rec(int x) {
-    printf("Dibujando %d trazos hacia la derecha\n", x);
+    //printf("Dibujando %d trazos hacia la derecha\n", x);
     SDL_SetRenderDrawColor(renderer, current_color.r, current_color.g, current_color.b, current_color.a);
-    SDL_RenderDrawLine(renderer, current_x, current_y, current_x + x, current_y);
-    current_x += x;
+    SDL_RenderDrawLine(renderer, current_x, current_y, current_x + drawPixels(x) , current_y);
+    current_x += drawPixels(x);
     SDL_RenderPresent(renderer);
 }
 
 void draw_lin(int x) {
-    printf("Dibujando %d trazos hacia la izquierda\n", x);
+    //printf("Dibujando %d trazos hacia la izquierda\n", x);
     SDL_SetRenderDrawColor(renderer, current_color.r, current_color.g, current_color.b, current_color.a);
-    SDL_RenderDrawLine(renderer, current_x, current_y, current_x - x, current_y);
-    current_x -= x;
+    SDL_RenderDrawLine(renderer, current_x, current_y, current_x - drawPixels(x), current_y);
+    current_x -= drawPixels(x);
     SDL_RenderPresent(renderer);
 }
 
 void draw_ube(int x) {
-    printf("Dibujando %d trazos hacia arriba\n", x);
+    //printf("Dibujando %d trazos hacia arriba\n", x);
     SDL_SetRenderDrawColor(renderer, current_color.r, current_color.g, current_color.b, current_color.a);
-    SDL_RenderDrawLine(renderer, current_x, current_y, current_x, current_y - x);
-    current_y -= x;
+    SDL_RenderDrawLine(renderer, current_x, current_y, current_x, current_y - drawPixels(x));
+    current_y -= drawPixels(x);
     SDL_RenderPresent(renderer);
 }
 
 void draw_unt(int x) {
-    printf("Dibujando %d trazos hacia abajo\n", x);
+    //printf("Dibujando %d trazos hacia abajo\n", x);
     SDL_SetRenderDrawColor(renderer, current_color.r, current_color.g, current_color.b, current_color.a);
-    SDL_RenderDrawLine(renderer, current_x, current_y, current_x, current_y + x);
-    current_y += x;
+    SDL_RenderDrawLine(renderer, current_x, current_y, current_x, current_y + drawPixels(x));
+    current_y += drawPixels(x);
     SDL_RenderPresent(renderer);
 }
 
-
 void assign_value(const char* id, const char* value) {
-    printf("Asignando a %s el valor %s\n", id, value);
+    //printf("Asignando a %s el valor %s\n", id, value);
     symbol_table[id] = value;
 }
 
 void assign_value_int(const char* id, int value) {
-    printf("Asignando a %s el valor %d\n", id, value);
+    //printf("Asignando a %s el valor %d\n", id, value);
     char buffer[20];
     snprintf(buffer, sizeof(buffer), "%d", value);
     symbol_table[id] = buffer;
@@ -268,4 +268,8 @@ void cleanup_sdl() {
         SDL_DestroyWindow(window);
     }
     SDL_Quit();
+}
+
+int drawPixels(int x) {
+    return (int)(x * (96 / 2.54));
 }
